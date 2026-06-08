@@ -27,7 +27,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px; /* Ampliado un poco para acomodar las 6 columnas */
             width: 100%;
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -165,9 +165,9 @@
         }
 
         th, td {
-            padding: 14px 15px;
+            padding: 14px 12px;
             text-align: left;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             border-bottom: 1px solid var(--border);
         }
 
@@ -175,7 +175,7 @@
             background-color: #0f172a;
             color: var(--text-muted);
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             letter-spacing: 0.5px;
         }
 
@@ -193,8 +193,8 @@
         }
 
         .flag-span {
-            font-size: 1.2rem;
-            margin-right: 6px;
+            font-size: 1.1rem;
+            margin-right: 4px;
             vertical-align: middle;
         }
 
@@ -227,7 +227,7 @@
 <div class="quinela-wrapper">
     <div class="container">
         <h1>🏆 Sorteo Mundial Rda por Rda</h1>
-        <p class="subtitle">Fase de Grupos • Formato Vertical Estricto</p>
+        <p class="subtitle">Fase de Grupos • Formato Vertical Estricto (6 Equipos c/u)</p>
 
         <div id="turn-display" class="turn-announcer">Conectando con la nube...</div>
 
@@ -250,6 +250,8 @@
                         <th>Ronda 2</th>
                         <th>Ronda 3</th>
                         <th>Ronda 4</th>
+                        <th>Ronda 5</th>
+                        <th>Ronda 6</th>
                     </tr>
                 </thead>
                 <tbody id="table-rows"></tbody>
@@ -280,7 +282,6 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    // IMPORTANTE: Cambié la ruta del nodo para que no interfiera con el otro sorteo
     const sorteoRef = ref(db, 'sorteoMundialIndependiente');
 
     const listadoOficialMundial = [
@@ -302,7 +303,6 @@
         {"nombre": "Bosnia y Herz.", "flag": "🇧🇦"}, {"nombre": "R.D. Congo", "flag": "🇨🇩"}, {"nombre": "Irak", "flag": "🇮🇶"}
     ];
 
-    // Lista de los 8 nuevos participantes en el orden exacto solicitado
     const sociosOrdenados = [
         "eduardo", "david", "javier", "diego", "verastegui", "mike", "rene", "doc"
     ];
@@ -362,8 +362,9 @@
 
         if (animando) return;
 
-        if (tómbola.length === 0 || indiceTurnoActual >= sociosOrdenados.length * 4) {
-            announcer.innerText = "🎉 ¡SORTEO OFICIAL COMPLETADO! Todos los socios tienen 4 selecciones.";
+        // Corregido el tope: 8 socios * 6 rondas = 48 esferas
+        if (tómbola.length === 0 || indiceTurnoActual >= sociosOrdenados.length * 6) {
+            announcer.innerText = "🎉 ¡SORTEO OFICIAL COMPLETADO! Todos los socios tienen sus 6 selecciones.";
             announcer.style.background = "rgba(16, 185, 129, 0.1)";
             announcer.style.borderColor = "var(--accent-green)";
             announcer.style.color = "var(--accent-green)";
@@ -387,7 +388,7 @@
         sociosOrdenados.forEach(user => {
             const teams = registroAsignaciones[user] || [];
             const isHisTurn = (user === socioEnTurnoActual && tómbola.length > 0);
-            const isCompleted = teams.length === 4;
+            const isCompleted = teams.length === 6; // Completo con 6 equipos
 
             let rowClass = "";
             if (isHisTurn) rowClass = "active-row";
@@ -396,7 +397,8 @@
             let rowHtml = `<tr class="${rowClass}">`;
             rowHtml += `<td><strong>${user}</strong> ${isHisTurn ? '🎯' : ''} ${isCompleted ? '✅' : ''}</td>`;
 
-            for (let i = 0; i < 4; i++) {
+            // Bucle corregido para renderizar las 6 columnas de rondas
+            for (let i = 0; i < 6; i++) {
                 if (teams[i] && teams[i] !== "vacío") {
                     rowHtml += `<td><span class="flag-span">${teams[i].flag}</span><strong>${teams[i].nombre}</strong></td>`;
                 } else {
@@ -413,7 +415,8 @@
         const ball = document.getElementById('ball');
         const statusText = document.getElementById('status-text');
 
-        if (tómbola.length === 0 || indiceTurnoActual >= sociosOrdenados.length * 4 || animando) return;
+        // Límite de seguridad ajustado a 48 (8 * 6)
+        if (tómbola.length === 0 || indiceTurnoActual >= sociosOrdenados.length * 6 || animando) return;
 
         const socioEnTurno = sociosOrdenados[indiceTurnoActual % sociosOrdenados.length];
 
